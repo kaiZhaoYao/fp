@@ -9,11 +9,11 @@
         
         /* --- 全局樣式與新配色 --- */
         :root {
-            --primary-color: #20c997; /* 主色 - 藍綠色 */
-            --primary-color-dark: #1a9875; /* 主色 - 深色 */
-            --primary-color-light: #e9f9f4; /* 主色 - 淺色 */
-            --secondary-color: #0d6efd; /* 次要顏色 - 藍色 (用於列印按鈕) */
-            --secondary-color-dark: #0b5ed7;
+            --primary-color: #0d6efd; /* 主色 - 藍色 */
+            --primary-color-dark: #0b5ed7;
+            --primary-color-light: #e7f1ff;
+            --secondary-color: #198754; /* 次要顏色 - 綠色 (用於列印按鈕) */
+            --secondary-color-dark: #157347;
             --background-color: #f8f9fa; /* 頁面背景色 */
             --card-background: #ffffff; /* 卡片背景色 */
             --text-color: #343a40; /* 主要文字顏色 */
@@ -22,6 +22,7 @@
             --medium-gray: #f1f3f5; /* 中灰色 (用於切換器背景) */
             --danger-color: #dc3545; /* 危險/刪除顏色 */
             --red-text-color: #D32F2F; /* 紅色字體 */
+            --stamp-bg-color: #f1f3f5; /* 發票章背景色 */
         }
 
         body {
@@ -63,7 +64,7 @@
 
         /* --- 輸入面板 --- */
         .input-panel {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: grid;
             gap: 20px;
         }
         .input-group { display: flex; flex-direction: column; }
@@ -72,9 +73,41 @@
             padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 16px;
         }
         .input-group input[readonly] { background-color: var(--medium-gray); cursor: not-allowed; }
+        .input-group select.is-taxable {
+            color: var(--red-text-color);
+            font-weight: 500;
+        }
+        input::placeholder {
+            color: #adb5bd;
+            font-style: italic;
+        }
         
-        .triplicate-only { display: none; }
-        .mode-3-part .triplicate-only { display: flex; }
+        /* 三聯式排版 */
+        .mode-3-part .input-panel {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: auto auto;
+        }
+        .mode-3-part #customer-id-group { grid-column: 1 / 2; grid-row: 1 / 2; }
+        .mode-3-part #customer-name-group { grid-column: 2 / 3; grid-row: 1 / 2; }
+        .mode-3-part #customer-address-group { grid-column: 3 / 4; grid-row: 1 / 2; }
+        .mode-3-part #total-with-tax-group { grid-column: 1 / 2; grid-row: 2 / 3; }
+        .mode-3-part #sales-amount-group { grid-column: 2 / 3; grid-row: 2 / 3; }
+        .mode-3-part #tax-type-select-group { grid-column: 3 / 4; grid-row: 2 / 3; }
+
+        /* 二聯式排版 */
+        .mode-2-part .input-panel {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: auto auto;
+        }
+        .mode-2-part #customer-id-group,
+        .mode-2-part #customer-name-group {
+             display: none;
+        }
+        .mode-2-part #total-with-tax-group { grid-column: 1 / 2; grid-row: 1 / 2; }
+        .mode-2-part #sales-amount-group { grid-column: 2 / 3; grid-row: 1 / 2; }
+        .mode-2-part #tax-type-select-group { grid-column: 3 / 4; grid-row: 1 / 2; }
+        .mode-2-part #customer-address-group { grid-column: 1 / 4; grid-row: 2 / 3; }
+
 
         /* --- 項目表格 --- */
         .items-table-wrapper {
@@ -121,21 +154,47 @@
         }
         .preview-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .preview-header .seller-info h3 { margin: 0; font-size: 24px; letter-spacing: 5px; border-bottom: 2px solid var(--primary-color); display: inline-block; padding-bottom: 2px;}
-        .preview-header .seller-info p { margin: 5px 0; font-size: 14px; }
         .preview-header .date-info { text-align: right; font-size: 14px; border-bottom: 1px solid var(--primary-color); }
         .preview-buyer-info { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 5px 0; margin: 10px 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 10px; align-items: center;}
+        .preview-buyer-info:empty { display: none; }
         .preview-buyer-info .label { font-weight: bold; }
-        .preview-items-table { border-collapse: collapse; width: 100%; }
-        .preview-items-table th, .preview-items-table td { border: 1px solid #000; padding: 5px; text-align: left; font-size: 14px; }
-        .preview-items-table th { text-align: center; }
-        .preview-items-list { min-height: 150px; }
-        .preview-items-list .item-row td { padding: 4px 5px; border: none; border-right: 1px solid #000; border-left: 1px solid #000; }
-        .preview-items-list .item-row:last-child td { border-bottom: 1px solid #000; }
-        .preview-summary { display: grid; grid-template-columns: 3fr 1fr; margin-top: -1px; }
-        .preview-summary-table { width: 100%; border-collapse: collapse; }
+        
+        .preview-main-table { border-collapse: collapse; width: 100%; }
+        .preview-main-table th, .preview-main-table td { border: 1px solid #000; padding: 5px; text-align: left; font-size: 14px; }
+        .preview-main-table thead th { text-align: center; }
+        .preview-main-table tbody { min-height: 150px; }
+        .preview-main-table tbody .item-row td { padding: 4px 5px; border: none; border-right: 1px solid #000; border-left: 1px solid #000; }
+        .preview-main-table tbody .item-row:last-child td { border-bottom: 1px solid #000; }
+        
+        .preview-summary-flex { display: flex; margin-top: -1px; }
+        .preview-summary-table { width: 75%; border-collapse: collapse; }
         .preview-summary-table td { border: 1px solid #000; padding: 5px; vertical-align: middle; }
         .preview-summary-table .label { text-align: center; font-weight: bold; }
-        .preview-stamp-area { border: 1px solid #000; display: flex; justify-content: center; align-items: center; color: #888; font-size: 14px; text-align: center; padding: 10px; background-color: #fafafa; }
+        .preview-summary-table .label-small { font-size:12px; font-weight:normal; text-align: center; }
+        .preview-summary-table .value { text-align: right; }
+        .preview-summary-table .checkmark { text-align: center; height: 25px; }
+        
+        .chinese-currency-container {
+            text-align: center;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+        
+        .preview-stamp-area { 
+            width: 25%;
+            border: 1px solid #000;
+            border-left: none;
+            background-color: var(--stamp-bg-color);
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            color: #555; 
+            font-size: 18px; 
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
         .preview-footer { display: flex; justify-content: space-between; padding-top: 5px; font-size: 12px; }
         .red-text { color: var(--red-text-color); }
 
@@ -153,15 +212,21 @@
             transform: translateY(-2px);
         }
 
-        /* --- 列印專用樣式 --- */
+        /* --- 列印專用樣式 (修正後) --- */
         #print-area { display: none; }
         @media print {
-            body * { display: none !important; }
-            #print-area, #print-area * { display: block !important; }
+            body > .invoice-app-container {
+                display: none;
+            }
+            #print-area {
+                display: block;
+            }
             .invoice-preview {
                 page-break-after: always;
-                border: none !important;
                 box-shadow: none !important;
+                border: none !important;
+                margin: 0;
+                padding: 0;
             }
             .invoice-preview:last-child {
                 page-break-after: auto;
@@ -173,7 +238,13 @@
             body { padding: 10px; }
             .invoice-app-container { margin: 10px auto; }
             .card { padding: 20px; }
-            .input-panel { grid-template-columns: 1fr; }
+            .input-panel, .mode-3-part .input-panel, .mode-2-part .input-panel {
+                 grid-template-columns: 1fr;
+            }
+            .mode-3-part .input-group, .mode-2-part .input-panel .input-group {
+                grid-column: auto;
+                grid-row: auto;
+            }
             .preview-controls { flex-direction: column; align-items: flex-start; gap: 10px;}
         }
 
@@ -193,27 +264,27 @@
         <div class="card">
             <!-- 輸入面板 -->
             <div class="input-panel">
-                <div class="input-group triplicate-only">
+                <div class="input-group" id="customer-id-group">
                     <label for="customer-id">統一編號</label>
-                    <input type="text" id="customer-id" placeholder="8碼數字">
+                    <input type="text" id="customer-id" placeholder="8碼數字" maxlength="8">
                 </div>
-                <div class="input-group triplicate-only">
+                <div class="input-group" id="customer-name-group">
                     <label for="customer-name">公司名稱 (買受人)</label>
-                    <input type="text" id="customer-name" placeholder="客戶公司全名">
+                    <input type="text" id="customer-name" placeholder="(抬頭)">
                 </div>
-                 <div class="input-group">
+                 <div class="input-group" id="customer-address-group">
                     <label for="customer-address">地址</label>
-                    <input type="text" id="customer-address" placeholder="客戶地址">
+                    <input type="text" id="customer-address" placeholder="(可省略)">
                 </div>
-                <div class="input-group">
+                <div class="input-group" id="total-with-tax-group">
                     <label for="total-with-tax">收款金額 (含稅價)</label>
-                    <input type="number" id="total-with-tax" placeholder="0">
+                    <input type="number" id="total-with-tax" placeholder="0" readonly>
                 </div>
-                <div class="input-group">
+                <div class="input-group" id="sales-amount-group">
                     <label for="sales-amount">銷售額 (未稅價)</label>
                     <input type="number" id="sales-amount" readonly>
                 </div>
-                <div class="input-group">
+                <div class="input-group" id="tax-type-select-group">
                     <label for="tax-type-select">課稅別</label>
                     <select id="tax-type-select">
                         <option value="taxable" data-rate="0.05">應稅 (5%)</option>
@@ -284,7 +355,7 @@
         const addItemBtn = document.getElementById('add-item-btn');
         const copySelect = document.getElementById('copy-select');
         const printBtn = document.getElementById('print-btn');
-        const allInputs = document.querySelectorAll('#customer-id, #customer-name, #customer-address, #total-with-tax, #tax-type-select');
+        const allInputs = document.querySelectorAll('#customer-id, #customer-name, #customer-address, #tax-type-select');
         const invoicePreviewContainer = document.getElementById('invoice-preview-container');
         const printArea = document.getElementById('print-area');
 
@@ -297,8 +368,8 @@
         function initialize() {
             switchMode('3-part');
             addInitialItem();
-            totalWithTaxInput.value = '0';
             updateAll();
+            handleTaxTypeChange();
         }
         
         initialize();
@@ -317,8 +388,14 @@
         });
 
         allInputs.forEach(input => input.addEventListener('input', updateAll));
+        taxTypeSelect.addEventListener('change', handleTaxTypeChange);
         copySelect.addEventListener('change', updateAll);
         printBtn.addEventListener('click', handlePrint);
+        
+        // 限定統一編號只能輸入數字
+        customerIdInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
 
         // --- 主要更新函數 ---
         function updateAll() {
@@ -327,8 +404,19 @@
         }
 
         // --- 功能函數 ---
+        function handleTaxTypeChange() {
+            if (taxTypeSelect.value === 'taxable') {
+                taxTypeSelect.classList.add('is-taxable');
+            } else {
+                taxTypeSelect.classList.remove('is-taxable');
+            }
+            updateAll();
+        }
+
         function switchMode(mode) {
+            const inputPanel = document.querySelector('.input-panel');
             container.className = 'invoice-app-container mode-' + mode;
+            inputPanel.className = 'input-panel'; // Reset class
             btn3Part.classList.toggle('active', mode === '3-part');
             btn2Part.classList.toggle('active', mode === '2-part');
             
@@ -399,54 +487,65 @@
                     </tr>
                 `;
             });
+
+            let buyerInfoHTML = '';
+            if (customerName) {
+                buyerInfoHTML += `<span class="label">買受人:</span> <span>${customerName}</span>`;
+            }
+            if (type === '三聯式' && customerId) {
+                buyerInfoHTML += `<span class="label">統一編號:</span> <span>${customerId}</span>`;
+            }
+            if (customerAddress) {
+                buyerInfoHTML += `<span class="label">地址:</span> <span>${customerAddress}</span>`;
+            }
             
             return `
                 <div class="invoice-preview">
                     <div class="preview-header">
                         <div class="seller-info">
                             <h3>${type}統一發票</h3>
-                            <p>您的公司名稱</p>
                         </div>
                         <div class="date-info">
                             中華民國 ${new Date().getFullYear() - 1911} 年 ${String(new Date().getMonth() + 1).padStart(2, '0')} 月 ${String(new Date().getDate()).padStart(2, '0')} 日
                         </div>
                     </div>
-                    <div class="preview-buyer-info">
-                        <span class="label">買受人:</span> <span>${customerName}</span>
-                        ${type === '三聯式' ? `<span class="label">統一編號:</span> <span>${customerId}</span>` : ''}
-                        <span class="label">地址:</span> <span>${customerAddress}</span>
-                    </div>
-                    <table class="preview-items-table">
+                    <div class="preview-buyer-info">${buyerInfoHTML}</div>
+                    <table class="preview-main-table">
                         <thead>
                             <tr>
-                                <th style="width:40%;">品名</th><th style="width:15%;">數量</th><th style="width:20%;">單價</th><th style="width:25%;">金額</th>
+                                <th style="width:40%;">品名</th>
+                                <th style="width:15%;">數量</th>
+                                <th style="width:20%;">單價</th>
+                                <th style="width:25%;">金額</th>
                             </tr>
                         </thead>
-                        <tbody class="preview-items-list">${itemsHTML}</tbody>
+                        <tbody>${itemsHTML}</tbody>
                     </table>
-                    <div class="preview-summary">
-                        <table class="preview-summary-table">
+                    <div class="preview-summary-flex">
+                         <table class="preview-summary-table">
                             <tr>
-                                <td class="label" style="width:20%;" rowspan="2">銷售額合計</td>
-                                <td rowspan="2" style="text-align:right; width:30%;">${formatCurrency(salesTotal)}</td>
-                                <td class="label" style="font-size:12px; font-weight:normal;">應稅</td>
-                                <td class="label" style="font-size:12px; font-weight:normal;">零稅率</td>
-                                <td class="label" style="font-size:12px; font-weight:normal;">免稅</td>
+                                <td class="label" rowspan="2" style="width:26.66%;">銷售額合計</td>
+                                <td rowspan="2" class="value" style="width:26.66%;">${formatCurrency(salesTotal)}</td>
+                                <td class="label-small" style="width:15.55%;">應稅</td>
+                                <td class="label-small" style="width:15.55%;">零稅率</td>
+                                <td class="label-small" style="width:15.55%;">免稅</td>
                             </tr>
                             <tr>
-                                <td style="text-align:center; height: 25px;">${taxType === 'taxable' ? 'V' : ''}</td>
-                                <td style="text-align:center;">${taxType === 'zero_rate' ? 'V' : ''}</td>
-                                <td style="text-align:center;">${taxType === 'exempt' ? 'V' : ''}</td>
+                                <td class="checkmark">${taxType === 'taxable' ? 'V' : ''}</td>
+                                <td class="checkmark">${taxType === 'zero_rate' ? 'V' : ''}</td>
+                                <td class="checkmark">${taxType === 'exempt' ? 'V' : ''}</td>
                             </tr>
                             <tr>
                                 <td class="label">營業稅</td>
-                                <td style="text-align:right;">${formatCurrency(tax)}</td>
+                                <td class="value">${formatCurrency(tax)}</td>
                                 <td class="label" colspan="2">總計</td>
-                                <td style="text-align:right; font-weight:bold;">${formatCurrency(totalWithTax)}</td>
+                                <td class="value" style="font-weight:bold;">${formatCurrency(totalWithTax)}</td>
                             </tr>
                             <tr>
                                 <td class="label">總計新台幣<br>(中文大寫)</td>
-                                <td colspan="4"><span>${totalInWords.prefix}</span><span class="red-text">${totalInWords.main}</span><span>${totalInWords.suffix}</span></td>
+                                <td colspan="4" class="chinese-currency-container">
+                                    ${totalInWords}
+                                </td>
                             </tr>
                         </table>
                         <div class="preview-stamp-area">營業人蓋用<br>統一發票專用章</div>
@@ -483,9 +582,9 @@
 
             return {
                 type: mode === '3-part' ? '三聯式' : '二聯式',
-                customerName: customerNameInput.value,
+                customerName: customerNameInput.value.replace('(抬頭)', '').trim(),
                 customerId: customerIdInput.value,
-                customerAddress: customerAddressInput.value,
+                customerAddress: customerAddressInput.value.replace('(可省略)', '').trim(),
                 items,
                 salesTotal,
                 tax,
@@ -497,14 +596,8 @@
 
         function handlePrint() {
             const data = getInvoiceData();
-            const mode = data.type === '三聯式' ? '3-part' : '2-part';
-            printArea.innerHTML = '';
-
-            copies[mode].forEach(copyText => {
-                const printData = { ...data, copyText };
-                printArea.innerHTML += generatePreviewHTML(printData);
-            });
-
+            data.copyText = copySelect.value;
+            printArea.innerHTML = generatePreviewHTML(data);
             window.print();
         }
 
@@ -516,41 +609,45 @@
         }
 
         function numberToChinese(n) {
-            if (!n || isNaN(n)) return { prefix: '零', main: '', suffix: '元整' };
-            if (n === 0) return { prefix: '零', main: '', suffix: '元整' };
-            const digit = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖'];
-            const unit = ['', '拾', '佰', '仟'];
-            const sectionUnit = ['', '萬', '億', '兆'];
-            let numStr = String(Math.round(n));
-            let result = '';
-            let section = '';
-            let zero = false;
-            let count = 0;
+            if (!n || isNaN(n)) return "零元整";
 
-            for (let i = numStr.length - 1; i >= 0; i--) {
-                const d = parseInt(numStr[i]);
-                const u = unit[count % 4];
-                if (d === 0) {
-                    if (count % 4 !== 0) zero = true;
-                } else {
-                    if (zero) {
-                        result = digit[0] + result;
-                        zero = false;
-                    }
-                    result = digit[d] + u + result;
-                }
-                if (count % 4 === 3 && i > 0) {
-                    section = sectionUnit[Math.floor(count / 4) + 1] + result + section;
-                    result = '';
-                }
-                count++;
+            const CN_ZERO = "零";
+            const CN_NUMS = ["", "壹", "貳", "參", "肆", "伍", "陸", "柒", "捌", "玖"];
+            const CN_INT_RADICE = ["", "拾", "佰", "仟"];
+            const CN_INT_UNITS = ["", "萬", "億", "兆"];
+
+            let integerNum = Math.round(n);
+            if (integerNum === 0) {
+                return "零元整";
             }
-            result = result + section;
+            
+            let result = '';
+            let zeroCount = 0;
+            let IntLen = String(integerNum).length;
+            for (let i = 0; i < IntLen; i++) {
+                let n = String(integerNum).substr(i, 1);
+                let p = IntLen - i - 1;
+                let q = Math.floor(p / 4);
+                let m = p % 4;
+                if (n == "0") {
+                    zeroCount++;
+                } else {
+                    if (zeroCount > 0) {
+                        result += CN_ZERO;
+                    }
+                    zeroCount = 0;
+                    result += CN_NUMS[parseInt(n)] + CN_INT_RADICE[m];
+                }
+                if (m == 0 && zeroCount < 4) {
+                    result += CN_INT_UNITS[q];
+                }
+            }
+            // 移除尾隨的零，並處理壹拾開頭的情況
+            result = result.replace(/零+$/, '');
             if (result.startsWith('壹拾')) {
                 result = result.substring(1);
             }
-            result = result.replace(/零+$/, '').replace(/零{2,}/g, '零');
-            return { prefix: '', main: result, suffix: '元整' };
+            return result + "元整";
         }
     });
     </script>
