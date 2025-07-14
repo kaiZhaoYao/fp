@@ -21,6 +21,7 @@
             --border-color: #dee2e6; /* 邊框顏色 */
             --medium-gray: #f1f3f5; /* 中灰色 (用於切換器背景) */
             --danger-color: #dc3545; /* 危險/刪除顏色 */
+            --red-text-color: #D32F2F; /* 紅色字體 */
         }
 
         body {
@@ -101,7 +102,16 @@
         .invoice-preview-wrapper {
              overflow-x: auto; /* 讓預覽區塊可以水平滾動 */
         }
-        .invoice-preview-wrapper h2 { text-align: center; color: var(--text-color); margin-bottom: 20px; }
+        .preview-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .preview-controls h2 {
+            margin: 0;
+            color: var(--text-color);
+        }
         .invoice-preview {
             border: 2px solid var(--text-color-light);
             padding: 20px;
@@ -110,11 +120,10 @@
             min-width: 700px; /* 給預覽內容一個最小寬度，防止其被過度壓縮 */
         }
         .preview-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .preview-header .seller-info { text-align: center; }
-        .preview-header .seller-info h3 { margin: 0; font-size: 24px; letter-spacing: 5px; }
+        .preview-header .seller-info h3 { margin: 0; font-size: 24px; letter-spacing: 5px; border-bottom: 2px solid var(--primary-color); display: inline-block; padding-bottom: 2px;}
         .preview-header .seller-info p { margin: 5px 0; font-size: 14px; }
-        .preview-header .date-info { text-align: right; font-size: 14px; }
-        .preview-buyer-info { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 5px 0; margin: 10px 0; display: grid; grid-template-columns: 1fr 2fr; gap: 5px 10px; }
+        .preview-header .date-info { text-align: right; font-size: 14px; border-bottom: 1px solid var(--primary-color); }
+        .preview-buyer-info { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 5px 0; margin: 10px 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 10px; align-items: center;}
         .preview-buyer-info .label { font-weight: bold; }
         .preview-items-table { border-collapse: collapse; width: 100%; }
         .preview-items-table th, .preview-items-table td { border: 1px solid #000; padding: 5px; text-align: left; font-size: 14px; }
@@ -122,11 +131,13 @@
         .preview-items-list { min-height: 150px; }
         .preview-items-list .item-row td { padding: 4px 5px; border: none; border-right: 1px solid #000; border-left: 1px solid #000; }
         .preview-items-list .item-row:last-child td { border-bottom: 1px solid #000; }
-        .preview-summary { display: grid; grid-template-columns: 2.5fr 1fr; margin-top: -1px; }
+        .preview-summary { display: grid; grid-template-columns: 3fr 1fr; margin-top: -1px; }
         .preview-summary-table { width: 100%; border-collapse: collapse; }
-        .preview-summary-table td { border: 1px solid #000; padding: 5px; }
+        .preview-summary-table td { border: 1px solid #000; padding: 5px; vertical-align: middle; }
         .preview-summary-table .label { text-align: center; font-weight: bold; }
-        .preview-stamp-area { border: 1px solid #000; display: flex; justify-content: center; align-items: center; color: #888; font-size: 14px; text-align: center; padding: 10px; }
+        .preview-stamp-area { border: 1px solid #000; display: flex; justify-content: center; align-items: center; color: #888; font-size: 14px; text-align: center; padding: 10px; background-color: #fafafa; }
+        .preview-footer { display: flex; justify-content: space-between; padding-top: 5px; font-size: 12px; }
+        .red-text { color: var(--red-text-color); }
 
         /* --- 控制按鈕 --- */
         .controls { text-align: center; margin-top: 30px; }
@@ -142,27 +153,30 @@
             transform: translateY(-2px);
         }
 
-        /* --- 響應式設計 --- */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px; /* 在小螢幕上減少 body 的 padding */
+        /* --- 列印專用樣式 --- */
+        #print-area { display: none; }
+        @media print {
+            body * { display: none !important; }
+            #print-area, #print-area * { display: block !important; }
+            .invoice-preview {
+                page-break-after: always;
+                border: none !important;
+                box-shadow: none !important;
             }
-            .invoice-app-container {
-                margin: 10px auto; /* 在小螢幕上減少 container 的 margin */
-            }
-            .card {
-                padding: 20px; /* 在小螢幕上減少 card 的 padding */
-            }
-            .input-panel {
-                grid-template-columns: 1fr; /* 輸入面板在小螢幕上改為單欄 */
+            .invoice-preview:last-child {
+                page-break-after: auto;
             }
         }
 
-        @media print {
-            body { background-color: #fff; padding: 0; }
-            .card, .controls { display: none; }
-            .invoice-preview-wrapper { display: block !important; overflow-x: visible; }
+        /* --- 響應式設計 --- */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .invoice-app-container { margin: 10px auto; }
+            .card { padding: 20px; }
+            .input-panel { grid-template-columns: 1fr; }
+            .preview-controls { flex-direction: column; align-items: flex-start; gap: 10px;}
         }
+
     </style>
 </head>
 <body>
@@ -200,11 +214,11 @@
                     <input type="number" id="sales-amount" readonly>
                 </div>
                 <div class="input-group">
-                    <label for="tax-rate">稅率</label>
-                    <select id="tax-rate">
-                        <option value="0.05">應稅 (5%)</option>
-                        <option value="0">零稅率 (0%)</option>
-                        <option value="0">免稅</option>
+                    <label for="tax-type-select">課稅別</label>
+                    <select id="tax-type-select">
+                        <option value="taxable" data-rate="0.05">應稅 (5%)</option>
+                        <option value="zero_rate" data-rate="0">零稅率</option>
+                        <option value="exempt" data-rate="0">免稅</option>
                     </select>
                 </div>
             </div>
@@ -230,69 +244,28 @@
         </div>
 
         <!-- 發票預覽 -->
-        <div class="card invoice-preview-wrapper">
-            <h2>發票預覽</h2>
-            <div class="invoice-preview">
-                <div class="preview-header">
-                    <div class="seller-info">
-                        <h3><span id="preview-invoice-type">三聯式</span>統一發票</h3>
-                        <p>您的公司名稱</p>
-                    </div>
-                    <div class="date-info">
-                        中華民國 
-                        <span id="preview-date-year">114</span> 年 
-                        <span id="preview-date-month">07</span> 月 
-                        <span id="preview-date-day">14</span> 日
-                    </div>
+        <div class="card">
+            <div class="preview-controls">
+                <h2>發票預覽</h2>
+                <div class="input-group">
+                    <label for="copy-select">顯示聯別</label>
+                    <select id="copy-select"></select>
                 </div>
-                <div class="preview-buyer-info">
-                    <span class="label">買受人:</span> <span id="preview-customer-name"></span>
-                    <span class="label">統一編號:</span> <span id="preview-customer-id"></span>
-                    <span class="label">地址:</span> <span id="preview-customer-address"></span>
-                </div>
-                <table class="preview-items-table">
-                    <thead>
-                        <tr>
-                            <th style="width:40%;">品名</th>
-                            <th style="width:15%;">數量</th>
-                            <th style="width:20%;">單價</th>
-                            <th style="width:25%;">金額</th>
-                        </tr>
-                    </thead>
-                    <tbody class="preview-items-list" id="preview-items-list">
-                        <!-- 動態項目將插入此處 -->
-                    </tbody>
-                </table>
-                <div class="preview-summary">
-                    <table class="preview-summary-table">
-                        <tr>
-                            <td class="label" style="width:25%;">銷售額合計</td>
-                            <td id="preview-sales-total" style="text-align:right;">0</td>
-                            <td class="label" style="width:20%;">課稅別</td>
-                            <td id="preview-tax-type" style="text-align:center;">V</td>
-                        </tr>
-                        <tr>
-                            <td class="label">營業稅</td>
-                            <td id="preview-tax-amount" style="text-align:right;">0</td>
-                            <td class="label">總計</td>
-                            <td id="preview-grand-total" style="text-align:right; font-weight:bold;">0</td>
-                        </tr>
-                        <tr>
-                            <td class="label">總計新台幣<br>(中文大寫)</td>
-                            <td colspan="3" id="preview-total-in-words" style="font-size:12px;">零元整</td>
-                        </tr>
-                    </table>
-                    <div class="preview-stamp-area">
-                        營業人蓋用<br>統一發票專用章
-                    </div>
+            </div>
+            <div class="invoice-preview-wrapper">
+                <div id="invoice-preview-container">
+                    <!-- 預覽發票將插入此處 -->
                 </div>
             </div>
         </div>
         
         <div class="controls">
-            <button class="print-btn" onclick="window.print()">列印 / 另存為 PDF</button>
+            <button id="print-btn" class="print-btn">列印 / 另存為 PDF</button>
         </div>
     </div>
+    
+    <!-- 用於列印的隱藏區域 -->
+    <div id="print-area"></div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -301,33 +274,34 @@
         const btn3Part = document.getElementById('btn-3-part');
         const btn2Part = document.getElementById('btn-2-part');
         
-        // 輸入欄位
-        const allInputs = document.querySelectorAll('#customer-id, #customer-name, #customer-address, #total-with-tax, #tax-rate');
         const customerIdInput = document.getElementById('customer-id');
         const customerNameInput = document.getElementById('customer-name');
         const customerAddressInput = document.getElementById('customer-address');
         const totalWithTaxInput = document.getElementById('total-with-tax');
         const salesAmountInput = document.getElementById('sales-amount');
-        const taxRateSelect = document.getElementById('tax-rate');
+        const taxTypeSelect = document.getElementById('tax-type-select');
         const itemsBody = document.getElementById('items-body');
         const addItemBtn = document.getElementById('add-item-btn');
+        const copySelect = document.getElementById('copy-select');
+        const printBtn = document.getElementById('print-btn');
+        const allInputs = document.querySelectorAll('#customer-id, #customer-name, #customer-address, #total-with-tax, #tax-type-select');
+        const invoicePreviewContainer = document.getElementById('invoice-preview-container');
+        const printArea = document.getElementById('print-area');
 
-        // 預覽欄位
-        const previewInvoiceType = document.getElementById('preview-invoice-type');
-        const previewCustomerId = document.getElementById('preview-customer-id');
-        const previewCustomerName = document.getElementById('preview-customer-name');
-        const previewCustomerAddress = document.getElementById('preview-customer-address');
-        const previewItemsList = document.getElementById('preview-items-list');
-        const previewSalesTotal = document.getElementById('preview-sales-total');
-        const previewTaxType = document.getElementById('preview-tax-type');
-        const previewTaxAmount = document.getElementById('preview-tax-amount');
-        const previewGrandTotal = document.getElementById('preview-grand-total');
-        const previewTotalInWords = document.getElementById('preview-total-in-words');
+        const copies = {
+            '3-part': ['第一聯：存根聯', '第二聯：扣抵聯', '第三聯：收執聯'],
+            '2-part': ['第一聯：存根聯', '第二聯：收執聯']
+        };
         
         // --- 初始化 ---
-        switchMode('3-part');
-        addPresetItems();
-        updateAll();
+        function initialize() {
+            switchMode('3-part');
+            addInitialItem();
+            totalWithTaxInput.value = '0';
+            updateAll();
+        }
+        
+        initialize();
 
         // --- 事件監聽 ---
         btn3Part.addEventListener('click', () => switchMode('3-part'));
@@ -343,6 +317,8 @@
         });
 
         allInputs.forEach(input => input.addEventListener('input', updateAll));
+        copySelect.addEventListener('change', updateAll);
+        printBtn.addEventListener('click', handlePrint);
 
         // --- 主要更新函數 ---
         function updateAll() {
@@ -352,37 +328,43 @@
 
         // --- 功能函數 ---
         function switchMode(mode) {
-            if (mode === '3-part') {
-                container.classList.add('mode-3-part');
-                container.classList.remove('mode-2-part');
-                btn3Part.classList.add('active');
-                btn2Part.classList.remove('active');
-                previewInvoiceType.textContent = '三聯式';
-            } else {
-                container.classList.add('mode-2-part');
-                container.classList.remove('mode-3-part');
-                btn2Part.classList.add('active');
-                btn3Part.classList.remove('active');
-                previewInvoiceType.textContent = '二聯式';
+            container.className = 'invoice-app-container mode-' + mode;
+            btn3Part.classList.toggle('active', mode === '3-part');
+            btn2Part.classList.toggle('active', mode === '2-part');
+            
+            // 更新聯別下拉選單
+            copySelect.innerHTML = '';
+            copies[mode].forEach(copyText => {
+                const option = document.createElement('option');
+                option.value = copyText;
+                option.textContent = copyText;
+                copySelect.appendChild(option);
+            });
+            
+            updateAll();
+        }
+        
+        function addInitialItem() {
+            if (itemsBody.rows.length === 0) {
+                addNewItem();
             }
-            updatePreview(); // 切換模式時也要更新預覽
         }
 
-        function addPresetItems() {
-            addNewItem('網站設計服務', 1, 60000);
-            addNewItem('網站主機代管', 1, 8000);
-        }
-
-        function addNewItem(name = '', qty = 1, price = 0) {
+        function addNewItem(name = '', qty = '', price = '') {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><input type="text" placeholder="項目名稱" value="${name}"></td>
-                <td><input type="number" class="item-qty" value="${qty}" min="0"></td>
-                <td><input type="number" class="item-price" value="${price.toFixed(0)}" min="0"></td>
-                <td class="text-right item-total">${formatCurrency(qty * price)}</td>
+                <td><input type="number" class="item-qty" value="${qty}" min="0" placeholder="0"></td>
+                <td><input type="number" class="item-price" value="${price}" min="0" step="0.01" placeholder="0.00"></td>
+                <td class="text-right item-total">0</td>
                 <td><button class="delete-row-btn">✖</button></td>
             `;
             itemsBody.appendChild(row);
+        }
+
+        function getTaxRate() {
+            const selectedOption = taxTypeSelect.options[taxTypeSelect.selectedIndex];
+            return selectedOption ? parseFloat(selectedOption.dataset.rate) : 0.05;
         }
 
         function calculateFromItems() {
@@ -395,7 +377,7 @@
                 salesTotal += total;
             });
             
-            const taxRate = parseFloat(taxRateSelect.value);
+            const taxRate = getTaxRate();
             const tax = salesTotal * taxRate;
             const totalWithTax = salesTotal + tax;
 
@@ -403,53 +385,139 @@
             salesAmountInput.value = salesTotal.toFixed(0);
         }
         
+        function generatePreviewHTML(data) {
+            const { type, copyText, customerName, customerId, customerAddress, items, salesTotal, tax, totalWithTax, totalInWords, taxType } = data;
+            
+            let itemsHTML = '';
+            items.forEach(item => {
+                itemsHTML += `
+                    <tr class="item-row">
+                        <td>${item.name || '&nbsp;'}</td>
+                        <td style="text-align:right;">${item.qty}</td>
+                        <td style="text-align:right;">${formatCurrency(item.price)}</td>
+                        <td style="text-align:right;">${formatCurrency(item.total)}</td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <div class="invoice-preview">
+                    <div class="preview-header">
+                        <div class="seller-info">
+                            <h3>${type}統一發票</h3>
+                            <p>您的公司名稱</p>
+                        </div>
+                        <div class="date-info">
+                            中華民國 ${new Date().getFullYear() - 1911} 年 ${String(new Date().getMonth() + 1).padStart(2, '0')} 月 ${String(new Date().getDate()).padStart(2, '0')} 日
+                        </div>
+                    </div>
+                    <div class="preview-buyer-info">
+                        <span class="label">買受人:</span> <span>${customerName}</span>
+                        ${type === '三聯式' ? `<span class="label">統一編號:</span> <span>${customerId}</span>` : ''}
+                        <span class="label">地址:</span> <span>${customerAddress}</span>
+                    </div>
+                    <table class="preview-items-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40%;">品名</th><th style="width:15%;">數量</th><th style="width:20%;">單價</th><th style="width:25%;">金額</th>
+                            </tr>
+                        </thead>
+                        <tbody class="preview-items-list">${itemsHTML}</tbody>
+                    </table>
+                    <div class="preview-summary">
+                        <table class="preview-summary-table">
+                            <tr>
+                                <td class="label" style="width:20%;" rowspan="2">銷售額合計</td>
+                                <td rowspan="2" style="text-align:right; width:30%;">${formatCurrency(salesTotal)}</td>
+                                <td class="label" style="font-size:12px; font-weight:normal;">應稅</td>
+                                <td class="label" style="font-size:12px; font-weight:normal;">零稅率</td>
+                                <td class="label" style="font-size:12px; font-weight:normal;">免稅</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; height: 25px;">${taxType === 'taxable' ? 'V' : ''}</td>
+                                <td style="text-align:center;">${taxType === 'zero_rate' ? 'V' : ''}</td>
+                                <td style="text-align:center;">${taxType === 'exempt' ? 'V' : ''}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">營業稅</td>
+                                <td style="text-align:right;">${formatCurrency(tax)}</td>
+                                <td class="label" colspan="2">總計</td>
+                                <td style="text-align:right; font-weight:bold;">${formatCurrency(totalWithTax)}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">總計新台幣<br>(中文大寫)</td>
+                                <td colspan="4"><span>${totalInWords.prefix}</span><span class="red-text">${totalInWords.main}</span><span>${totalInWords.suffix}</span></td>
+                            </tr>
+                        </table>
+                        <div class="preview-stamp-area">營業人蓋用<br>統一發票專用章</div>
+                    </div>
+                    <div class="preview-footer">
+                        <span>*應稅、零稅率、免稅之銷售額應分別開立統一發票，並應於各該欄打「V」。</span>
+                        <span>${copyText}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
         function updatePreview() {
-            // 更新買受人資訊
-            previewCustomerName.textContent = customerNameInput.value;
-            previewCustomerId.textContent = customerIdInput.value;
-            previewCustomerAddress.textContent = customerAddressInput.value;
+            const data = getInvoiceData();
+            data.copyText = copySelect.value;
+            invoicePreviewContainer.innerHTML = generatePreviewHTML(data);
+        }
 
-            // 更新項目列表
-            previewItemsList.innerHTML = '';
+        function getInvoiceData() {
             let salesTotal = 0;
-            itemsBody.querySelectorAll('tr').forEach(row => {
+            const items = Array.from(itemsBody.querySelectorAll('tr')).map(row => {
                 const name = row.querySelector('input[type="text"]').value;
-                const qty = row.querySelector('.item-qty').value;
-                const price = row.querySelector('.item-price').value;
+                const qty = row.querySelector('.item-qty').value || '0';
+                const price = row.querySelector('.item-price').value || '0';
                 const total = (parseFloat(qty) || 0) * (parseFloat(price) || 0);
                 salesTotal += total;
-
-                const previewRow = document.createElement('tr');
-                previewRow.classList.add('item-row');
-                previewRow.innerHTML = `
-                    <td>${name}</td>
-                    <td style="text-align:right;">${qty}</td>
-                    <td style="text-align:right;">${formatCurrency(price)}</td>
-                    <td style="text-align:right;">${formatCurrency(total)}</td>
-                `;
-                previewItemsList.appendChild(previewRow);
+                return { name, qty, price, total };
             });
 
-            // 更新總計
-            const taxRate = parseFloat(taxRateSelect.value);
+            const taxRate = getTaxRate();
             const tax = salesTotal * taxRate;
             const totalWithTax = salesTotal + tax;
+            const mode = container.classList.contains('mode-3-part') ? '3-part' : '2-part';
 
-            previewSalesTotal.textContent = formatCurrency(salesTotal);
-            previewTaxAmount.textContent = formatCurrency(tax);
-            previewGrandTotal.textContent = formatCurrency(totalWithTax);
-            previewTotalInWords.textContent = numberToChinese(totalWithTax) + '元整';
-            previewTaxType.textContent = taxRate > 0 ? 'V' : '';
+            return {
+                type: mode === '3-part' ? '三聯式' : '二聯式',
+                customerName: customerNameInput.value,
+                customerId: customerIdInput.value,
+                customerAddress: customerAddressInput.value,
+                items,
+                salesTotal,
+                tax,
+                totalWithTax,
+                totalInWords: numberToChinese(totalWithTax),
+                taxType: taxTypeSelect.value
+            };
+        }
+
+        function handlePrint() {
+            const data = getInvoiceData();
+            const mode = data.type === '三聯式' ? '3-part' : '2-part';
+            printArea.innerHTML = '';
+
+            copies[mode].forEach(copyText => {
+                const printData = { ...data, copyText };
+                printArea.innerHTML += generatePreviewHTML(printData);
+            });
+
+            window.print();
         }
 
         // --- 工具函數 ---
         function formatCurrency(num) {
-            return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            const number = parseFloat(num);
+            if (isNaN(number)) return '0';
+            return number.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
         function numberToChinese(n) {
-            if (!n || isNaN(n)) return '零';
-            if (n === 0) return '零';
+            if (!n || isNaN(n)) return { prefix: '零', main: '', suffix: '元整' };
+            if (n === 0) return { prefix: '零', main: '', suffix: '元整' };
             const digit = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖'];
             const unit = ['', '拾', '佰', '仟'];
             const sectionUnit = ['', '萬', '億', '兆'];
@@ -481,7 +549,8 @@
             if (result.startsWith('壹拾')) {
                 result = result.substring(1);
             }
-            return result.replace(/零+$/, '').replace(/零{2,}/g, '零');
+            result = result.replace(/零+$/, '').replace(/零{2,}/g, '零');
+            return { prefix: '', main: result, suffix: '元整' };
         }
     });
     </script>
