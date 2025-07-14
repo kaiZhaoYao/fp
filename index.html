@@ -6,22 +6,25 @@
     <title>二聯/三聯式統一發票產生器 (含即時預覽)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        
+        /* --- 全局樣式與新配色 --- */
         :root {
-            --primary-color: #ffb74d;
+            --primary-color: #ffb74d; /* 主色 - 金黃色 */
             --primary-color-dark: #f57c00;
             --primary-color-light: #fff8e1;
-            --secondary-color: #0d6efd;
+            --secondary-color: #0d6efd; /* 次要顏色 - 藍色 (用於列印按鈕) */
             --secondary-color-dark: #0b5ed7;
-            --background-color: #f8f9fa;
-            --card-background: #ffffff;
-            --text-color: #343a40;
-            --text-color-light: #6c757d;
-            --border-color: #dee2e6;
-            --medium-gray: #f1f3f5;
-            --danger-color: #dc3545;
-            --red-text-color: #D32F2F;
-            --stamp-bg-color: #f0ead6;
+            --background-color: #f8f9fa; /* 頁面背景色 */
+            --card-background: #ffffff; /* 卡片背景色 */
+            --text-color: #343a40; /* 主要文字顏色 */
+            --text-color-light: #6c757d; /* 次要文字顏色 */
+            --border-color: #dee2e6; /* 邊框顏色 */
+            --medium-gray: #f1f3f5; /* 中灰色 (用於切換器背景) */
+            --danger-color: #dc3545; /* 危險/刪除顏色 */
+            --red-text-color: #D32F2F; /* 紅色字體 */
+            --stamp-bg-color: #f0ead6; /* 發票章背景色 */
         }
+
         body {
             font-family: 'Inter', 'Noto Sans TC', sans-serif;
             background-color: var(--background-color);
@@ -30,6 +33,8 @@
             padding: 20px;
             line-height: 1.6;
         }
+
+        /* --- 主容器 --- */
         .invoice-app-container {
             max-width: 900px;
             margin: 20px auto;
@@ -42,6 +47,8 @@
             border: 1px solid var(--border-color);
             margin-bottom: 30px;
         }
+
+        /* --- 發票類型切換器 --- */
         .invoice-type-switcher {
             display: flex; justify-content: center; border-radius: 8px;
             background-color: var(--medium-gray); padding: 5px;
@@ -54,9 +61,12 @@
         .invoice-type-switcher button.active {
             background-color: var(--card-background); color: var(--primary-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* --- 輸入面板 (行動裝置優先) --- */
         .input-panel {
             display: grid;
             gap: 20px;
+            grid-template-columns: 1fr; /* 預設為單欄 */
         }
         .input-group { display: flex; flex-direction: column; }
         .input-group label { margin-bottom: 5px; font-size: 14px; color: var(--text-color-light); }
@@ -72,34 +82,45 @@
             color: #adb5bd;
             font-style: italic;
         }
-        .mode-3-part .input-panel {
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: auto auto;
-        }
-        .mode-3-part #customer-id-group { grid-column: 1 / 2; grid-row: 1 / 2; }
-        .mode-3-part #customer-name-group { grid-column: 2 / 3; grid-row: 1 / 2; }
-        .mode-3-part #customer-address-group { grid-column: 3 / 4; grid-row: 1 / 2; }
-        .mode-3-part #total-with-tax-group { grid-column: 1 / 2; grid-row: 2 / 3; }
-        .mode-3-part #sales-amount-group { grid-column: 2 / 3; grid-row: 2 / 3; }
-        .mode-3-part #tax-type-select-group { grid-column: 3 / 4; grid-row: 2 / 3; }
-        .mode-2-part .input-panel {
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: auto auto;
-        }
+        
         .mode-2-part #customer-id-group,
         .mode-2-part #customer-name-group {
              display: none;
         }
-        .mode-2-part #total-with-tax-group { grid-column: 1 / 2; grid-row: 1 / 2; }
-        .mode-2-part #sales-amount-group { grid-column: 2 / 3; grid-row: 1 / 2; }
-        .mode-2-part #tax-type-select-group { grid-column: 3 / 4; grid-row: 1 / 2; }
-        .mode-2-part #customer-address-group { grid-column: 1 / 4; grid-row: 2 / 3; }
+
+        /* --- 桌面版排版 --- */
+        @media (min-width: 769px) {
+            /* 三聯式排版 */
+            .mode-3-part .input-panel {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: auto auto;
+            }
+            .mode-3-part #customer-id-group { grid-column: 1 / 2; grid-row: 1 / 2; }
+            .mode-3-part #customer-name-group { grid-column: 2 / 3; grid-row: 1 / 2; }
+            .mode-3-part #customer-address-group { grid-column: 3 / 4; grid-row: 1 / 2; }
+            .mode-3-part #total-with-tax-group { grid-column: 1 / 2; grid-row: 2 / 3; }
+            .mode-3-part #sales-amount-group { grid-column: 2 / 3; grid-row: 2 / 3; }
+            .mode-3-part #tax-type-select-group { grid-column: 3 / 4; grid-row: 2 / 3; }
+
+            /* 二聯式排版 */
+            .mode-2-part .input-panel {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: auto auto;
+            }
+            .mode-2-part #total-with-tax-group { grid-column: 1 / 2; grid-row: 1 / 2; }
+            .mode-2-part #sales-amount-group { grid-column: 2 / 3; grid-row: 1 / 2; }
+            .mode-2-part #tax-type-select-group { grid-column: 3 / 4; grid-row: 1 / 2; }
+            .mode-2-part #customer-address-group { grid-column: 1 / 4; grid-row: 2 / 3; }
+        }
+
+
+        /* --- 項目表格 --- */
         .items-table-wrapper {
-            overflow-x: auto;
+            overflow-x: auto; /* 讓表格可以在小螢幕上水平滾動 */
         }
         .items-table { 
             width: 100%; 
-            min-width: 600px; 
+            min-width: 600px; /* 給表格一個最小寬度 */
             border-collapse: collapse; 
             margin-bottom: 10px; 
         }
@@ -114,8 +135,10 @@
             background: var(--card-background); border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s;
         }
         #add-item-btn:hover { background: var(--primary-color-light); }
+
+        /* --- 發票預覽區塊 --- */
         .invoice-preview-wrapper {
-             overflow-x: auto;
+             overflow-x: auto; /* 讓預覽區塊可以水平滾動 */
         }
         .preview-controls {
             display: flex;
@@ -131,8 +154,8 @@
             border: 2px solid var(--text-color-light);
             padding: 20px;
             background: #fff;
-            font-family: 'MingLiU', 'KaiTi', 'DFKai-SB', serif;
-            min-width: 700px;
+            font-family: 'MingLiU', 'KaiTi', 'DFKai-SB', serif; /* 使用標楷體或類似字體 */
+            min-width: 700px; /* 給預覽內容一個最小寬度，防止其被過度壓縮 */
         }
         .preview-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .preview-header .seller-info h3 { margin: 0; font-size: 24px; letter-spacing: 5px; border-bottom: 2px solid var(--primary-color); display: inline-block; padding-bottom: 2px;}
@@ -140,12 +163,14 @@
         .preview-buyer-info { padding: 5px 0; margin: 10px 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 10px; align-items: center;}
         .preview-buyer-info:empty { display: none; }
         .preview-buyer-info .label { font-weight: bold; }
+        
         .preview-main-table { border-collapse: collapse; width: 100%; }
         .preview-main-table th, .preview-main-table td { border: 1px solid #000; padding: 5px; text-align: left; font-size: 14px; }
         .preview-main-table thead th { text-align: center; }
         .preview-main-table tbody { min-height: 150px; }
         .preview-main-table tbody .item-row td { padding: 4px 5px; border: none; border-right: 1px solid #000; border-left: 1px solid #000; }
         .preview-main-table tbody .item-row:last-child td { border-bottom: 1px solid #000; }
+        
         .preview-summary-flex { display: flex; margin-top: -1px; }
         .preview-summary-table { width: 75%; border-collapse: collapse; }
         .preview-summary-table td { border: 1px solid #000; padding: 5px; vertical-align: middle; }
@@ -153,11 +178,13 @@
         .preview-summary-table .label-small { font-size:12px; font-weight:normal; text-align: center; }
         .preview-summary-table .value { text-align: right; }
         .preview-summary-table .checkmark { text-align: center; height: 25px; }
+        
         .chinese-currency-container {
             text-align: center;
             font-size: 14px;
             letter-spacing: 2px;
         }
+        
         .preview-stamp-area { 
             width: 25%;
             border: 1px solid #000;
@@ -175,6 +202,8 @@
         }
         .preview-footer { display: flex; justify-content: space-between; padding-top: 5px; font-size: 12px; }
         .red-text { color: var(--red-text-color); }
+
+        /* --- 控制按鈕 --- */
         .controls { text-align: center; margin-top: 30px; }
         .controls button {
             color: white; border: none; padding: 12px 25px;
@@ -187,6 +216,8 @@
             background-color: var(--secondary-color-dark);
             transform: translateY(-2px);
         }
+
+        /* --- 列印專用樣式 (修正後) --- */
         #print-area { display: none; }
         @media print {
             body > .invoice-app-container {
@@ -207,36 +238,29 @@
             }
         }
 
-        /* ========== RWD 手機專用修正 ========== */
-        @media (max-width: 700px) {
-            .card { padding: 12px 5px; border-radius: 0; margin-bottom: 15px;}
-            .invoice-app-container { max-width: 100vw; margin: 0; padding: 0; }
-            .input-panel,
-            .mode-3-part .input-panel,
-            .mode-2-part .input-panel { display: flex !important; flex-direction: column !important; gap: 8px;}
-            .items-table, .preview-main-table, .preview-summary-table { width: 100% !important; min-width: 0 !important; font-size: 13px; word-break: break-all;}
-            .items-table th, .items-table td,
-            .preview-main-table th, .preview-main-table td { padding: 7px 2px !important;}
-            .invoice-preview { min-width: 0 !important; padding: 7px !important; font-size: 13px !important;}
-            .preview-summary-flex { flex-direction: column !important; gap: 3px;}
-            .preview-stamp-area { width: 100% !important; font-size: 14px !important; margin-top: 5px; border-left: 1px solid #000 !important;}
-            .controls button { width: 100%; padding: 12px 0; font-size: 15px; margin: 6px 0;}
-            .items-table-wrapper, .invoice-preview-wrapper { overflow-x: auto; width: 100%;}
-            input, select { font-size: 15px !important; height: 44px !important; min-height: 40px !important;}
-            .preview-header .seller-info h3 { font-size: 18px; letter-spacing: 1px; padding-bottom: 1px;}
-            .preview-header .date-info { font-size: 12px;}
+        /* --- 響應式設計 --- */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .invoice-app-container { margin: 10px auto; }
+            .card { padding: 20px; }
+            .preview-controls { flex-direction: column; align-items: flex-start; gap: 10px;}
         }
+
     </style>
 </head>
 <body>
+
     <div class="invoice-app-container">
         <div class="card">
+            <!-- 發票類型切換器 -->
             <div class="invoice-type-switcher">
                 <button id="btn-3-part" class="active">三聯式發票 (開給公司)</button>
                 <button id="btn-2-part">二聯式發票 (開給個人)</button>
             </div>
         </div>
+
         <div class="card">
+            <!-- 輸入面板 -->
             <div class="input-panel">
                 <div class="input-group" id="customer-id-group">
                     <label for="customer-id">統一編號</label>
@@ -246,7 +270,7 @@
                     <label for="customer-name">公司名稱 (買受人)</label>
                     <input type="text" id="customer-name" placeholder="(抬頭)">
                 </div>
-                <div class="input-group" id="customer-address-group">
+                 <div class="input-group" id="customer-address-group">
                     <label for="customer-address">地址</label>
                     <input type="text" id="customer-address" placeholder="(可省略)">
                 </div>
@@ -268,7 +292,9 @@
                 </div>
             </div>
         </div>
+
         <div class="card">
+             <!-- 項目表格 -->
             <div class="items-table-wrapper">
                 <table class="items-table">
                     <thead>
@@ -285,6 +311,8 @@
             </div>
             <button id="add-item-btn">+ 新增項目</button>
         </div>
+
+        <!-- 發票預覽 -->
         <div class="card">
             <div class="preview-controls">
                 <h2>發票預覽</h2>
@@ -294,19 +322,27 @@
                 </div>
             </div>
             <div class="invoice-preview-wrapper">
-                <div id="invoice-preview-container"></div>
+                <div id="invoice-preview-container">
+                    <!-- 預覽發票將插入此處 -->
+                </div>
             </div>
         </div>
+        
         <div class="controls">
             <button id="print-btn" class="print-btn">列印 / 另存為 PDF</button>
         </div>
     </div>
+    
+    <!-- 用於列印的隱藏區域 -->
     <div id="print-area"></div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM 元素 ---
         const container = document.querySelector('.invoice-app-container');
         const btn3Part = document.getElementById('btn-3-part');
         const btn2Part = document.getElementById('btn-2-part');
+        
         const customerIdInput = document.getElementById('customer-id');
         const customerNameInput = document.getElementById('customer-name');
         const customerAddressInput = document.getElementById('customer-address');
@@ -320,19 +356,26 @@
         const allInputs = document.querySelectorAll('#customer-id, #customer-name, #customer-address, #tax-type-select');
         const invoicePreviewContainer = document.getElementById('invoice-preview-container');
         const printArea = document.getElementById('print-area');
+
         const copies = {
             '3-part': ['第一聯：存根聯', '第二聯：扣抵聯', '第三聯：收執聯'],
             '2-part': ['第一聯：存根聯', '第二聯：收執聯']
         };
+        
+        // --- 初始化 ---
         function initialize() {
             switchMode('3-part');
             addInitialItem();
             updateAll();
             handleTaxTypeChange();
         }
+        
         initialize();
+
+        // --- 事件監聽 ---
         btn3Part.addEventListener('click', () => switchMode('3-part'));
         btn2Part.addEventListener('click', () => switchMode('2-part'));
+        
         addItemBtn.addEventListener('click', () => addNewItem());
         itemsBody.addEventListener('input', updateAll);
         itemsBody.addEventListener('click', (e) => {
@@ -341,17 +384,24 @@
                 updateAll();
             }
         });
+
         allInputs.forEach(input => input.addEventListener('input', updateAll));
         taxTypeSelect.addEventListener('change', handleTaxTypeChange);
         copySelect.addEventListener('change', updateAll);
         printBtn.addEventListener('click', handlePrint);
+        
+        // 限定統一編號只能輸入數字
         customerIdInput.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
         });
+
+        // --- 主要更新函數 ---
         function updateAll() {
             calculateFromItems();
             updatePreview();
         }
+
+        // --- 功能函數 ---
         function handleTaxTypeChange() {
             if (taxTypeSelect.value === 'taxable') {
                 taxTypeSelect.classList.add('is-taxable');
@@ -360,12 +410,15 @@
             }
             updateAll();
         }
+
         function switchMode(mode) {
             const inputPanel = document.querySelector('.input-panel');
             container.className = 'invoice-app-container mode-' + mode;
-            inputPanel.className = 'input-panel';
+            inputPanel.className = 'input-panel'; // Reset class
             btn3Part.classList.toggle('active', mode === '3-part');
             btn2Part.classList.toggle('active', mode === '2-part');
+            
+            // 更新聯別下拉選單
             copySelect.innerHTML = '';
             copies[mode].forEach(copyText => {
                 const option = document.createElement('option');
@@ -373,13 +426,16 @@
                 option.textContent = copyText;
                 copySelect.appendChild(option);
             });
+            
             updateAll();
         }
+        
         function addInitialItem() {
             if (itemsBody.rows.length === 0) {
                 addNewItem();
             }
         }
+
         function addNewItem(name = '', qty = '', price = '') {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -391,10 +447,12 @@
             `;
             itemsBody.appendChild(row);
         }
+
         function getTaxRate() {
             const selectedOption = taxTypeSelect.options[taxTypeSelect.selectedIndex];
             return selectedOption ? parseFloat(selectedOption.dataset.rate) : 0.05;
         }
+
         function calculateFromItems() {
             let salesTotal = 0;
             itemsBody.querySelectorAll('tr').forEach(row => {
@@ -404,14 +462,18 @@
                 row.querySelector('.item-total').textContent = formatCurrency(total);
                 salesTotal += total;
             });
+            
             const taxRate = getTaxRate();
             const tax = salesTotal * taxRate;
             const totalWithTax = salesTotal + tax;
+
             totalWithTaxInput.value = totalWithTax.toFixed(0);
             salesAmountInput.value = salesTotal.toFixed(0);
         }
+        
         function generatePreviewHTML(data) {
             const { type, copyText, customerName, customerId, customerAddress, items, salesTotal, tax, totalWithTax, totalInWords, taxType } = data;
+            
             let itemsHTML = '';
             items.forEach(item => {
                 itemsHTML += `
@@ -423,6 +485,7 @@
                     </tr>
                 `;
             });
+
             let buyerInfoHTML = '';
             if (customerName) {
                 buyerInfoHTML += `<span class="label">買受人:</span> <span>${customerName}</span>`;
@@ -433,6 +496,7 @@
             if (customerAddress) {
                 buyerInfoHTML += `<span class="label">地址:</span> <span>${customerAddress}</span>`;
             }
+            
             return `
                 <div class="invoice-preview">
                     <div class="preview-header">
@@ -491,11 +555,13 @@
                 </div>
             `;
         }
+        
         function updatePreview() {
             const data = getInvoiceData();
             data.copyText = copySelect.value;
             invoicePreviewContainer.innerHTML = generatePreviewHTML(data);
         }
+
         function getInvoiceData() {
             let salesTotal = 0;
             const items = Array.from(itemsBody.querySelectorAll('tr')).map(row => {
@@ -506,10 +572,12 @@
                 salesTotal += total;
                 return { name, qty, price, total };
             });
+
             const taxRate = getTaxRate();
             const tax = salesTotal * taxRate;
             const totalWithTax = salesTotal + tax;
             const mode = container.classList.contains('mode-3-part') ? '3-part' : '2-part';
+
             return {
                 type: mode === '3-part' ? '三聯式' : '二聯式',
                 customerName: customerNameInput.value.replace('(抬頭)', '').trim(),
@@ -523,53 +591,72 @@
                 taxType: taxTypeSelect.value
             };
         }
+
         function handlePrint() {
             const data = getInvoiceData();
             data.copyText = copySelect.value;
             printArea.innerHTML = generatePreviewHTML(data);
             window.print();
         }
+
+        // --- 工具函數 ---
         function formatCurrency(num) {
             const number = parseFloat(num);
             if (isNaN(number)) return '0';
             return number.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
+
         function numberToChinese(n) {
             if (!n || isNaN(n)) return "零元整";
-            const CN_NUMS = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖'];
-            const CN_INT_RADICE = ["", "拾", "佰", "仟"];
-            const CN_INT_UNITS = ["", "萬", "億", "兆"];
-            let integerNum = Math.floor(n);
-            if (integerNum === 0) return "零元整";
-            let result = '';
-            let zeroCount = 0;
-            let IntLen = String(integerNum).length;
-            let needZero = false;
-            for (let i = 0; i < IntLen; i++) {
-                let n = String(integerNum).substr(i, 1);
-                let p = IntLen - i - 1;
-                let q = Math.floor(p / 4);
-                let m = p % 4;
-                if (n == "0") {
-                    needZero = true;
-                } else {
-                    if (needZero) {
-                        result += `<span class="red-text">${CN_NUMS[0]}</span>`;
-                    }
-                    result += `<span class="red-text">${CN_NUMS[parseInt(n)]}</span>${CN_INT_RADICE[m]}`;
-                    needZero = false;
+            
+            const digits = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖'];
+            const units = ['', '拾', '佰', '仟'];
+            const sections = ['', '萬', '億'];
+
+            let num = Math.round(n);
+            if (num === 0) return "零元整";
+
+            let parts = [];
+            let sectionIndex = 0;
+            while (num > 0) {
+                let section = num % 10000;
+                if (section > 0 || (num > 0 && parts.length > 0)) {
+                    parts.unshift(convertSection(section, sectionIndex > 0 && section < 1000 && parts.length > 0) + sections[sectionIndex]);
                 }
-                if (m == 0 && zeroCount < 4) {
-                    if(p > 0) {
-                       result = result.replace(/(<span class="red-text">零<\/span>)+$/, '') + CN_INT_UNITS[q];
+                num = Math.floor(num / 10000);
+                sectionIndex++;
+            }
+            
+            let result = parts.join('');
+            // 清理多餘的零
+            result = result.replace(/零+/g, '零');
+            result = result.replace(/零(萬|億|元整)/g, '$1');
+            result = result.replace(/(零)$/, '');
+
+            return result + '元整';
+
+            function convertSection(sectionNum, addLeadingZero) {
+                let str = '';
+                let zero = false;
+                for (let i = 0; i < 4; i++) {
+                    let digit = Math.floor(sectionNum / Math.pow(10, 3 - i)) % 10;
+                    if (digit > 0) {
+                        if (zero) {
+                            str += `<span class="red-text">${digits[0]}</span>`;
+                        }
+                        str += `<span class="red-text">${digits[digit]}</span>${units[3 - i]}`;
+                        zero = false;
+                    } else {
+                        if (!zero && i < 3 && str !== '' && (Math.floor(sectionNum / Math.pow(10, 2-i))) > 0) {
+                             zero = true;
+                        }
                     }
                 }
+                if(addLeadingZero && str.length > 0 && sectionNum < 1000) {
+                    str = `<span class="red-text">${digits[0]}</span>` + str;
+                }
+                return str;
             }
-            result = result.replace(/(<span class="red-text">零<\/span>)+$/, '');
-            if (result.startsWith('壹拾')) {
-                result = result.substring(21);
-            }
-            return result + "元整";
         }
     });
     </script>
