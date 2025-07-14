@@ -76,7 +76,15 @@
         .mode-3-part .triplicate-only { display: flex; }
 
         /* --- 項目表格 --- */
-        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        .items-table-wrapper {
+            overflow-x: auto; /* 讓表格可以在小螢幕上水平滾動 */
+        }
+        .items-table { 
+            width: 100%; 
+            min-width: 600px; /* 給表格一個最小寬度 */
+            border-collapse: collapse; 
+            margin-bottom: 10px; 
+        }
         .items-table th, .items-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); text-align: left; }
         .items-table th { background-color: var(--background-color); }
         .items-table input { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
@@ -90,12 +98,16 @@
         #add-item-btn:hover { background: var(--primary-color-light); }
 
         /* --- 發票預覽區塊 --- */
+        .invoice-preview-wrapper {
+             overflow-x: auto; /* 讓預覽區塊可以水平滾動 */
+        }
         .invoice-preview-wrapper h2 { text-align: center; color: var(--text-color); margin-bottom: 20px; }
         .invoice-preview {
             border: 2px solid var(--text-color-light);
             padding: 20px;
             background: #fff;
             font-family: 'MingLiU', 'KaiTi', 'DFKai-SB', serif; /* 使用標楷體或類似字體 */
+            min-width: 700px; /* 給預覽內容一個最小寬度，防止其被過度壓縮 */
         }
         .preview-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .preview-header .seller-info { text-align: center; }
@@ -130,10 +142,26 @@
             transform: translateY(-2px);
         }
 
+        /* --- 響應式設計 --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px; /* 在小螢幕上減少 body 的 padding */
+            }
+            .invoice-app-container {
+                margin: 10px auto; /* 在小螢幕上減少 container 的 margin */
+            }
+            .card {
+                padding: 20px; /* 在小螢幕上減少 card 的 padding */
+            }
+            .input-panel {
+                grid-template-columns: 1fr; /* 輸入面板在小螢幕上改為單欄 */
+            }
+        }
+
         @media print {
             body { background-color: #fff; padding: 0; }
             .card, .controls { display: none; }
-            .invoice-preview-wrapper { display: block !important; }
+            .invoice-preview-wrapper { display: block !important; overflow-x: visible; }
         }
     </style>
 </head>
@@ -184,18 +212,20 @@
 
         <div class="card">
              <!-- 項目表格 -->
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th style="width:35%;">品名</th>
-                        <th style="width:15%;" class="text-right">數量</th>
-                        <th style="width:20%;" class="text-right">單價</th>
-                        <th style="width:20%;" class="text-right">金額</th>
-                        <th style="width:10%;"></th>
-                    </tr>
-                </thead>
-                <tbody id="items-body"></tbody>
-            </table>
+            <div class="items-table-wrapper">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width:35%;">品名</th>
+                            <th style="width:15%;" class="text-right">數量</th>
+                            <th style="width:20%;" class="text-right">單價</th>
+                            <th style="width:20%;" class="text-right">金額</th>
+                            <th style="width:10%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-body"></tbody>
+                </table>
+            </div>
             <button id="add-item-btn">+ 新增項目</button>
         </div>
 
