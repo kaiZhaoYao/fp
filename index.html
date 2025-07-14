@@ -9,11 +9,11 @@
         
         /* --- 全局樣式與新配色 --- */
         :root {
-            --primary-color: #0d6efd; /* 主色 - 藍色 */
-            --primary-color-dark: #0b5ed7;
-            --primary-color-light: #e7f1ff;
-            --secondary-color: #198754; /* 次要顏色 - 綠色 (用於列印按鈕) */
-            --secondary-color-dark: #157347;
+            --primary-color: #ffb74d; /* 主色 - 金黃色 */
+            --primary-color-dark: #f57c00;
+            --primary-color-light: #fff8e1;
+            --secondary-color: #0d6efd; /* 次要顏色 - 藍色 (用於列印按鈕) */
+            --secondary-color-dark: #0b5ed7;
             --background-color: #f8f9fa; /* 頁面背景色 */
             --card-background: #ffffff; /* 卡片背景色 */
             --text-color: #343a40; /* 主要文字顏色 */
@@ -22,7 +22,7 @@
             --medium-gray: #f1f3f5; /* 中灰色 (用於切換器背景) */
             --danger-color: #dc3545; /* 危險/刪除顏色 */
             --red-text-color: #D32F2F; /* 紅色字體 */
-            --stamp-bg-color: #f1f3f5; /* 發票章背景色 */
+            --stamp-bg-color: #f0ead6; /* 發票章背景色 */
         }
 
         body {
@@ -155,7 +155,7 @@
         .preview-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .preview-header .seller-info h3 { margin: 0; font-size: 24px; letter-spacing: 5px; border-bottom: 2px solid var(--primary-color); display: inline-block; padding-bottom: 2px;}
         .preview-header .date-info { text-align: right; font-size: 14px; border-bottom: 1px solid var(--primary-color); }
-        .preview-buyer-info { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 5px 0; margin: 10px 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 10px; align-items: center;}
+        .preview-buyer-info { padding: 5px 0; margin: 10px 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 10px; align-items: center;}
         .preview-buyer-info:empty { display: none; }
         .preview-buyer-info .label { font-weight: bold; }
         
@@ -611,38 +611,40 @@
         function numberToChinese(n) {
             if (!n || isNaN(n)) return "零元整";
 
-            const CN_ZERO = "零";
-            const CN_NUMS = ["", "壹", "貳", "參", "肆", "伍", "陸", "柒", "捌", "玖"];
+            const CN_NUMS = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖'];
             const CN_INT_RADICE = ["", "拾", "佰", "仟"];
             const CN_INT_UNITS = ["", "萬", "億", "兆"];
 
-            let integerNum = Math.round(n);
-            if (integerNum === 0) {
-                return "零元整";
-            }
+            let integerNum = Math.floor(n);
+            if (integerNum === 0) return "零元整";
             
             let result = '';
             let zeroCount = 0;
             let IntLen = String(integerNum).length;
+            let needZero = false;
+
             for (let i = 0; i < IntLen; i++) {
                 let n = String(integerNum).substr(i, 1);
                 let p = IntLen - i - 1;
                 let q = Math.floor(p / 4);
                 let m = p % 4;
+
                 if (n == "0") {
-                    zeroCount++;
+                    needZero = true;
                 } else {
-                    if (zeroCount > 0) {
-                        result += CN_ZERO;
+                    if (needZero) {
+                        result += CN_NUMS[0];
                     }
-                    zeroCount = 0;
                     result += CN_NUMS[parseInt(n)] + CN_INT_RADICE[m];
+                    needZero = false;
                 }
                 if (m == 0 && zeroCount < 4) {
-                    result += CN_INT_UNITS[q];
+                    if(p > 0) {
+                       result = result.replace(/零+$/, '') + CN_INT_UNITS[q];
+                    }
                 }
             }
-            // 移除尾隨的零，並處理壹拾開頭的情況
+            
             result = result.replace(/零+$/, '');
             if (result.startsWith('壹拾')) {
                 result = result.substring(1);
