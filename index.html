@@ -633,21 +633,21 @@
                     needZero = true;
                 } else {
                     if (needZero) {
-                        result += CN_NUMS[0];
+                        result += `<span class="red-text">${CN_NUMS[0]}</span>`;
                     }
-                    result += CN_NUMS[parseInt(n)] + CN_INT_RADICE[m];
+                    result += `<span class="red-text">${CN_NUMS[parseInt(n)]}</span>${CN_INT_RADICE[m]}`;
                     needZero = false;
                 }
                 if (m == 0 && zeroCount < 4) {
                     if(p > 0) {
-                       result = result.replace(/零+$/, '') + CN_INT_UNITS[q];
+                       result = result.replace(/(<span class="red-text">零<\/span>)+$/, '') + CN_INT_UNITS[q];
                     }
                 }
             }
             
-            result = result.replace(/零+$/, '');
+            result = result.replace(/(<span class="red-text">零<\/span>)+$/, '');
             if (result.startsWith('壹拾')) {
-                result = result.substring(1);
+                result = result.substring(21); // length of '<span>...</span>' for 壹
             }
             return result + "元整";
         }
